@@ -75,6 +75,27 @@ def t_error(t):
 # build the lexer
 lexer = lex.lex()
 
+def p_game(p):
+    '''
+    game : command
+         | empty
+    '''
+    print(p[1])
+
+def p_empty(p):
+    '''
+    empty :
+    '''
+    p[0] = None
+
+def p_command(p):
+    '''
+    command : VARNAME
+    '''
+    p[0] = p[1]
+
+parser = yacc.yacc()
+
 while 1:
     try:
         inp = input('2048> Please type a command.\n----> ')
@@ -82,6 +103,7 @@ while 1:
         lexer.input(inp)
         for tok in lexer:
             print(tok)
+        parser.parse(inp)
     except KeyboardInterrupt:
         print()
         break
