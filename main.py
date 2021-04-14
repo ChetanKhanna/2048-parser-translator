@@ -55,8 +55,16 @@ tokens += list(reserved.values())
 # t_VAR       = r'VAR'
 # t_IS        = r'IS'
 # t_QUERY     = r'VALUE IN'
-t_POS       = r'[1234],[1234]'
-t_VARNAME   = r'[a-zA-Z0-9]+'
+# t_POS       = r'[1234],[1234]'
+
+def t_POS(t):
+    r'[1234],[1234]'
+    return t
+
+def t_VARNAME(t):
+    r'[a-zA-Z0-9]+'
+    t.type = reserved.get(t.value, 'VARNAME')
+    return t
 
 t_ignore = ' \t'
 
