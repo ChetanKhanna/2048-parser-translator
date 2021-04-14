@@ -87,16 +87,29 @@ lexer = lex.lex()
 
 def p_game(p):
     '''
-    game : statement FULLSTOP
+    game : statement
+         | warn
     '''
-    print(p[1])
+    if str(p.slice[1]) == 'warn':
+        print('You should end a command with a fullstop.')
+    else:
+        print(p[1])
 
 def p_statement(p):
     '''
-    statement : move
-              | assign
-              | name
-              | query
+    statement : move FULLSTOP
+              | assign FULLSTOP
+              | name FULLSTOP
+              | query FULLSTOP
+    '''
+    p[0] = p[1]
+
+def p_warn(p):
+    '''
+    warn : move
+         | assign
+         | name
+         | query
     '''
     p[0] = p[1]
 
@@ -138,6 +151,9 @@ def p_query(p):
     query : VALUE IN POS
     '''
     p[0] = ('query', p[3])
+
+def p_error(p):
+    print('Syntac error!')
 
 parser = yacc.yacc()
 
