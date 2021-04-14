@@ -7,7 +7,7 @@ class Board:
             self.board = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
         else:
             self.board = board
-        self.board_copy = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+        self.changed = False
         self.empty_cells = []
         for i in range(4):
             for j in range(4):
@@ -24,6 +24,7 @@ class Board:
     
     def initiate_new_board(self):
         self.board = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+        self.empty_cells = []
         for i in range(4):
             for j in range(4):
                 self.empty_cells.append((i,j))
@@ -37,44 +38,77 @@ class Board:
                     self.empty_cells.append((i,j))
 
     def apply_move(self, move):
-        if move[1] not in ['LEFT', 'RIGHT', 'UP', 'DOWN']:
-            print('Invalid move!')
-            return -1
-        if move[1] == 'LEFT':
+        self.changed = False
+        if move[2] == 'LEFT':
             self._shift_left()
-            # self._merge_and_operate(move[2])
+            self._merge_left(move[1])
             self._shift_left()
-        elif move[1] == 'RIGHT':
+        elif move[2] == 'RIGHT':
             self._shift_right()
-            # self._merge_and_operate(move[2])
+            self._merge_right(move[1])
             self._shift_right()
-        # elif move[1] == 'UP':
-        #     self._shift_up()
-        #     self._merge_and_operate(move[2])
-        #     self._shift_up()
-        # else:
-        #     self._shift_down()
-        #     self._merge_and_operate(move[2])
-        #     self._shift_down()
-        self.fill_random_tile()
-        return 1
-    
+        elif move[2] == 'UP':
+            self.board = [list(i) for i in zip(*self.board)]
+            self._shift_left()
+            self._merge_left(move[1])
+            self._shift_left()
+            self.board = [list(i) for i in zip(*self.board)]
+        else:
+            self.board = [list(i) for i in zip(*self.board)]
+            self._shift_right()
+            self._merge_right(move[1])
+            self._shift_right()
+            self.board = [list(i) for i in zip(*self.board)]
+        if self.changed:
+            self.find_empty_cells()
+            self.fill_random_tile()
+
     def _shift_left(self):
         for i in range(4):
-            self.board[i] = [non_zero for non_zero in self.board[i] if non_zero!=0] \
+            tmp = [non_zero for non_zero in self.board[i] if non_zero!=0] \
                             + [zero for zero in self.board[i] if zero==0]
-        self.find_empty_cells()
-    
+            if tmp != self.board[i]:
+                self.board[i] = tmp
+                self.changed = True
+
     def _shift_right(self):
         for i in range(4):
-            self.board[i] = [zero for zero in self.board[i] if zero == 0] \
+            tmp = [zero for zero in self.board[i] if zero == 0] \
                     + [non_zero for non_zero in self.board[i] if non_zero != 0]
-        self.find_empty_cells()
-    
-    # def _shift_up():
+            if tmp != self.board[i]:
+                self.board[i] = tmp
+                self.changed = True
 
-        
-    
+    def _merge_left(self, op):
+        for i in range(4):
+            for j in range(3):
+                if self.board[i][j] > 0 and self.board[i][j] == self.board[i][j+1]:
+                    self.changed = True
+                    if op == 'ADD':
+                        self.board[i][j] += self.board[i][j+1]
+                    elif op == 'SUBTRACT':
+                        self.board[i][j] -= self.board[i][j+1]
+                    elif op == 'MULTIPLY':
+                        self.board[i][j] *= self.board[i][j+1]
+                    else:
+                        self.board[i][j] /= self.board[i][j+1]
+                    self.board[i][j+1] = 0
+
+    def _merge_right(self, op):
+        for i in range(4):
+            for j in range(3,0,-1):
+                if self.board[i][j] > 0 and self.board[i][j] == self.board[i][j-1]:
+                    self.changed = True
+                    if op == 'ADD':
+                        self.board[i][j] += self.board[i][j-1]
+                    elif op == 'SUBTRACT':
+                        self.board[i][j] -= self.board[i][j-1]
+                    elif op == 'MULTIPLY':
+                        self.board[i][j] *= self.board[i][j-1]
+                    else:
+                        self.board[i][j] /= self.board[i][j-1]
+                    self.board[i][j-1] = 0
+
     def print_board(self):
         for i in range(4):
             print('----'*8)
@@ -100,6 +134,14 @@ class Board:
 board = Board()
 board.initiate_new_board()
 board.print_board()
-board.apply_move(('move', 'RIGHT', 'ADD'))
+board.apply_move(('move', 'MULTIPLY', 'LEFT'))
+print()
+board.print_board()
+print()
+board.apply_move(('move', 'MULTIPLY', 'LEFT'))
+print()
+board.print_board()
+print()
+board.apply_move(('move', 'MULTIPLY', 'LEFT'))
 print()
 board.print_board()
