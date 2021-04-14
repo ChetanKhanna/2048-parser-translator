@@ -17,7 +17,8 @@ reserved = {
     'TO': 'TO',
     'VAR': 'VAR',
     'IS': 'IS',
-    'VALUE IN': 'QUERY'
+    'VALUE': 'VALUE',
+    'IN': 'IN',
 }
 
 tokens = [
@@ -36,7 +37,8 @@ tokens = [
     # 'QUERY',
     'POS',
     'VARNAME',
-    'VALUE',
+    'VAL',
+    'FULLSTOP',
 ]
 
 tokens += list(reserved.values())
@@ -61,9 +63,17 @@ def t_POS(t):
     r'[1234],[1234]'
     return t
 
-def t_VARNAME(t):
-    r'[a-zA-Z0-9]+'
+def t_ID(t):
+    r'[a-zA-Z][a-zA-Z0-9]*'
     t.type = reserved.get(t.value, 'VARNAME')
+    return t
+
+def t_VAL(t):
+    r'[0-9]+'
+    return t
+
+def t_FULLSTOP(t):
+    r'\.'
     return t
 
 t_ignore = ' \t'
@@ -77,32 +87,67 @@ lexer = lex.lex()
 
 def p_game(p):
     '''
-    game : command
-         | empty
+    game : statement FULLSTOP
     '''
     print(p[1])
 
-def p_empty(p):
+def p_statement(p):
     '''
-    empty :
-    '''
-    p[0] = None
-
-def p_command(p):
-    '''
-    command : VARNAME
+    statement : move
+              | assign
+              | name
+              | query
     '''
     p[0] = p[1]
+
+def p_move(p):
+    '''
+    move : ADD UP
+         | ADD DOWN
+         | ADD LEFT
+         | ADD RIGHT
+         | SUBTRACT UP
+         | SUBTRACT DOWN
+         | SUBTRACT LEFT
+         | SUBTRACT RIGHT
+         | MULTIPLY UP
+         | MULTIPLY DOWN
+         | MULTIPLY LEFT
+         | MULTIPLY RIGHT
+         | DIVIDE UP
+         | DIVIDE DOWN
+         | DIVIDE LEFT
+         | DIVIDE RIGHT
+    '''
+    p[0] = ('move', p[1], p[2])
+
+def p_assign(p):
+    '''
+    assign : ASSIGN VAL TO POS
+    '''
+    p[0] = ('assign', p[2], p[4])
+
+def p_name(p):
+    '''
+    name : VAR VARNAME IS POS
+    '''
+    p[0] = ('name', p[2], p[4])
+
+def p_query(p):
+    '''
+    query : VALUE IN POS
+    '''
+    p[0] = ('query', p[3])
 
 parser = yacc.yacc()
 
 while 1:
     try:
         inp = input('2048> Please type a command.\n----> ')
-        print('INPUT: ', inp)
         lexer.input(inp)
         for tok in lexer:
             print(tok)
+        print('INPUT: ', inp)
         parser.parse(inp)
     except KeyboardInterrupt:
         print()
