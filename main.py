@@ -163,7 +163,6 @@ while 1:
         lexer.input(inp)
         for tok in lexer:
             print(tok)
-        print('INPUT: ', inp)
         parser.parse(inp)
     except KeyboardInterrupt:
         print()
