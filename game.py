@@ -109,6 +109,17 @@ class Board:
                         self.board[i][j] /= self.board[i][j-1]
                     self.board[i][j-1] = 0
 
+    def apply_assign(self, assign):
+        val = int(assign[1])
+        i, j = list(map(int, assign[2].split(',')))
+        self.board[i-1][j-1] = val
+    
+    def apply_name(self, name):
+        pass
+
+    def apply_query(self, query):
+        pass
+
     def print_board(self):
         for i in range(4):
             print('----'*8)
@@ -143,5 +154,8 @@ print()
 board.print_board()
 print()
 board.apply_move(('move', 'MULTIPLY', 'LEFT'))
+print()
+board.print_board()
+board.apply_assign(('assign', '46', '3,4'))
 print()
 board.print_board()
