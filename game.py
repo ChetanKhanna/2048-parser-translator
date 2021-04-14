@@ -115,10 +115,12 @@ class Board:
         self.board[i-1][j-1] = val
     
     def apply_name(self, name):
-        pass
+        i, j = list(map(int, name[2].split(',')))
+        self.name_map[(i-1,j-1)] = name[1]
 
     def apply_query(self, query):
-        pass
+        i, j = list(map(int, query[1].split(',')))
+        return self.board[i-1][j-1]
 
     def print_board(self):
         for i in range(4):
@@ -159,3 +161,9 @@ board.print_board()
 board.apply_assign(('assign', '46', '3,4'))
 print()
 board.print_board()
+board.apply_name(('name', 'xyz', '4,3'))
+print()
+print(board.name_map)
+res = board.apply_query(('query', '4,1'))
+print()
+print(res)
