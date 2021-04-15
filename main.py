@@ -63,9 +63,9 @@ def t_QUESTIONMARK(t):
 t_ignore = ' \t'
 
 def t_error(t):
-    print('Illegal token in lexer') # only for debugging, remove later
+    # print('Illegal token in lexer') # only for debugging, remove later
     t.lexer.skip(1)
-    print_on_stderr()
+    # print_on_stderr()
 
 # build the lexer
 lexer = lex.lex()
