@@ -110,16 +110,16 @@ class Board:
                     self.board[i][j-1] = 0
 
     def apply_assign(self, assign):
-        val = int(assign[1])
-        i, j = list(map(int, assign[2].split(',')))
+        val = assign[1]
+        i, j = assign[2]
         self.board[i-1][j-1] = val
     
     def apply_name(self, name):
-        i, j = list(map(int, name[2].split(',')))
+        i, j = name[2]
         self.name_map[(i-1,j-1)] = name[1]
 
     def apply_query(self, query):
-        i, j = list(map(int, query[1].split(',')))
+        i, j = query[1]
         return self.board[i-1][j-1]
 
     def print_board(self):
@@ -158,12 +158,12 @@ print()
 board.apply_move(('move', 'MULTIPLY', 'LEFT'))
 print()
 board.print_board()
-board.apply_assign(('assign', '46', '3,4'))
+board.apply_assign(('assign', 46, (3, 4)))
 print()
 board.print_board()
-board.apply_name(('name', 'xyz', '4,3'))
+board.apply_name(('name', 'xyz', (4, 3)))
 print()
 print(board.name_map)
-res = board.apply_query(('query', '4,1'))
+res = board.apply_query(('query', (4, 1)))
 print()
 print(res)

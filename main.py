@@ -35,10 +35,15 @@ tokens = [
     # 'VAR',
     # 'IS',
     # 'QUERY',
-    'POS',
-    'VARNAME',
-    'VAL',
+    # 'POS',
+    # 'VARNAME',
+    # 'VAL',
+    # 'FULLSTOP',
+    'ID',
+    'NUMBER',
+    'COMMA',
     'FULLSTOP',
+    'QUESTIONMARK'
 ]
 
 tokens += list(reserved.values())
@@ -59,21 +64,34 @@ tokens += list(reserved.values())
 # t_QUERY     = r'VALUE IN'
 # t_POS       = r'[1234],[1234]'
 
-def t_POS(t):
-    r'[1234],[1234]'
-    return t
+# def t_POS(t):
+#     r'[1234],[1234]'
+#     return t
 
 def t_ID(t):
     r'[a-zA-Z][a-zA-Z0-9]*'
-    t.type = reserved.get(t.value, 'VARNAME')
+    t.type = reserved.get(t.value, 'ID')
     return t
 
-def t_VAL(t):
+# def t_VAL(t):
+#     r'[0-9]+'
+#     return t
+
+def t_NUMBER(t):
     r'[0-9]+'
+    t.value = int(t.value)
+    return t
+
+def t_COMMA(t):
+    r'\,'
     return t
 
 def t_FULLSTOP(t):
     r'\.'
+    return t
+
+def t_QUESTIONMARK(t):
+    r'\?'
     return t
 
 t_ignore = ' \t'
@@ -136,21 +154,21 @@ def p_move(p):
 
 def p_assign(p):
     '''
-    assign : ASSIGN VAL TO POS
+    assign : ASSIGN NUMBER TO NUMBER COMMA NUMBER
     '''
-    p[0] = ('assign', p[2], p[4])
+    p[0] = ('assign', p[2], (p[4], p[6]))
 
 def p_name(p):
     '''
-    name : VAR VARNAME IS POS
+    name : VAR ID IS NUMBER COMMA NUMBER
     '''
-    p[0] = ('name', p[2], p[4])
+    p[0] = ('name', p[2], (p[4], p[6]))
 
 def p_query(p):
     '''
-    query : VALUE IN POS
+    query : VALUE IN NUMBER COMMA NUMBER
     '''
-    p[0] = ('query', p[3])
+    p[0] = ('query', (p[3], p[5]))
 
 def p_error(p):
     print('Syntac error!')
