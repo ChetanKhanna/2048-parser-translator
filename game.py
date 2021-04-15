@@ -113,7 +113,10 @@ class Board:
                         self.board[i][j][0] *= self.board[i][j+1][0]
                     else:
                         self.board[i][j][0] /= self.board[i][j+1][0]
-                    self.board[i][j][1].update(self.board[i][j+1][1])
+                    if self.board[i][j][0] > 0:
+                        self.board[i][j][1].update(self.board[i][j+1][1])
+                    else:
+                        self.board[i][j][1] = set()
                     self.board[i][j+1] = [0, set()]
 
     def _merge_right(self, op):
@@ -129,7 +132,10 @@ class Board:
                         self.board[i][j][0] *= self.board[i][j-1][0]
                     else:
                         self.board[i][j][0] /= self.board[i][j-1][0]
-                    self.board[i][j][1].update(self.board[i][j-1][1])
+                    if self.board[i][j][0] > 0:
+                        self.board[i][j][1].update(self.board[i][j-1][1])
+                    else:
+                        self.board[i][j][1] = set()
                     self.board[i][j-1] = [0, set()]
 
     def apply_assign(self, assign):
