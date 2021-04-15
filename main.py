@@ -216,6 +216,9 @@ def run(stmt):
         if resp['status'] == 1:
             print('2048> Thanks, naming done.')
             print_on_stderr(board.board)
+        elif resp['status'] == -2:
+            print('2048>', resp['error'])
+            print_on_stderr(board.board)
         else:
             print_on_stderr()
     else:

@@ -1,12 +1,11 @@
 import random
-import copy
 
 class Board:
     '''
     General API for the game:
     returns a dictionary with the following keys:
     return = {
-        status = 1 for success, -1 for fail
+        status = 1 for success, -1 for fail, or otherwise as stated in the function
         data = {} of values returned by function or empty if failed or no data
         error = string describing error
     }
@@ -116,6 +115,7 @@ class Board:
                     if self.board[i][j][0] > 0:
                         self.board[i][j][1].update(self.board[i][j+1][1])
                     else:
+                        self.all_names.difference_update(self.board[i][j][1])
                         self.board[i][j][1] = set()
                     self.board[i][j+1] = [0, set()]
 
@@ -135,6 +135,7 @@ class Board:
                     if self.board[i][j][0] > 0:
                         self.board[i][j][1].update(self.board[i][j-1][1])
                     else:
+                        self.all_names.difference_update(self.board[i][j][1])
                         self.board[i][j][1] = set()
                     self.board[i][j-1] = [0, set()]
 
@@ -143,6 +144,9 @@ class Board:
             val = assign[1]
             i, j = assign[2]
             self.board[i-1][j-1][0] = val
+            if val == 0:
+                self.all_names.difference_update(self.board[i-1][j-1][1])
+                self.board[i-1][j-1][1] = set()
             return {'status': 1, 'data': {}, 'error': ''}
         except Exception as e:
             return {'status': -1, 'data': {}, 'error': e}
@@ -150,10 +154,14 @@ class Board:
     def apply_name(self, name):
         try:
             i, j = name[2]
-            if name[1] not in self.all_names:
+            if self.board[i-1][j-1][0] == 0:
+                return {'status': -2, 'data': {}, 'error': 'Cannot name empty cell.'}
+            if name[1] not in self.all_names :
                 self.all_names.add(name[1])
                 self.board[i-1][j-1][1].add(name[1])
-            return {'status': 1, 'data': {}, 'error': ''}
+                return {'status': 1, 'data': {}, 'error': ''}
+            else:
+                return {'status': -2, 'data': {}, 'error': 'Name already in use.'}
         except Exception as e:
             return {'status': -1, 'data': {}, 'error': e}
 
@@ -189,29 +197,3 @@ class Board:
                         space = ' '
                 print('|', val, end='     ')
             print('|')
-
-# board = Board()
-# board.initiate_new_board()
-# board.print_board()
-# board.apply_move(('move', 'MULTIPLY', 'LEFT'))
-# print()
-# board.print_board()
-# print()
-# board.apply_move(('move', 'MULTIPLY', 'LEFT'))
-# print()
-# board.print_board()
-# print()
-# board.apply_move(('move', 'MULTIPLY', 'LEFT'))
-# print()
-# board.print_board()
-# board.apply_assign(('assign', 46, (3, 4)))
-# print()
-# board.print_board()
-# board.apply_name(('name', 'xyz', (4, 3)))
-# board.apply_name(('name', 'abcd', (4, 3)))
-# print()
-# print(board.board)
-# print(board.all_names)
-# res = board.apply_query(('query', (4, 1)))
-# print()
-# print(res)
