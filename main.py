@@ -1,7 +1,10 @@
+import sys
 import ply.lex as lex
 import ply.yacc as yacc
+from game import Board
 
-# list of token names
+
+global_env = dict()
 
 # reserved token
 reserved = {
@@ -21,6 +24,7 @@ reserved = {
     'IN': 'IN',
 }
 
+# list of token names
 tokens = [
     # 'ADD',
     # 'SUBTRACT',
@@ -111,7 +115,7 @@ def p_game(p):
     if str(p.slice[1]) == 'warn':
         print('You should end a command with a fullstop.')
     else:
-        print(p[1])
+        run(p[1])
 
 def p_statement(p):
     '''
@@ -175,16 +179,66 @@ def p_error(p):
 
 parser = yacc.yacc()
 
-while 1:
-    try:
-        inp = input('2048> Please type a command.\n----> ')
-        lexer.input(inp)
-        for tok in lexer:
-            print(tok)
-        parser.parse(inp)
-    except KeyboardInterrupt:
-        print()
-        break
-    except EOFError:
-        print()
-        break
+def run(ast):
+    board = global_env['board']
+    if ast[0] == 'move':
+        resp = board.apply_move(ast)
+        if resp['status'] == 1:
+            print('2048> Thanks,', ast[2].lower(), 'move done, random tile added.')
+            print('2048> The current state is:')
+            board.print_board()
+            print_on_stderr(board.board)
+    elif ast[0] == 'assign':
+        resp = board.apply_assign(ast)
+        if resp['status'] == 1:
+            print('2048> Thanks, assignment done.')
+            print('2048> The current state is:')
+            board.print_board()
+            print_on_stderr(board.board)
+    elif ast[0] == 'name':
+        resp = board.apply_name(ast)
+        if resp['status'] == 1:
+            print('2048> Thanks, naming done.')
+            print_on_stderr(board.board)
+    else:
+        resp = board.apply_query(ast)
+        if resp[status] == 1:
+            print('2048> Thanks, querying done')
+            print('2048> Current value:', resp['data']['value'])
+            print_on_stderr(board.board)
+
+def print_on_stderr(board=None):
+    if board:
+        for i in range(4):
+            for j in range(4):
+                print(board[i][j][0], end=' ', file=sys.stderr)
+        for i in range(4):
+            for j in range(4):
+                if board[i][j][1]:
+                    print(i+1, end=',', file=sys.stderr)
+                    print(j+1, end='', file=sys.stderr)
+                    print(*board[i][j][1], sep=',', end=' ', file=sys.stderr)
+        print(file=sys.stderr)
+    else:
+        print(-1, file=sys.stderr)
+
+if __name__ == '__main__':
+    board = Board()
+    global_env['board'] = board
+    board.initiate_new_board()        
+    print('2048> Hi, I am 2048-game Engine.')
+    print('2048> The start state is:')
+    board.print_board()
+    while 1:
+        try:
+            inp = input('2048> Please type a command.\n----> ')
+            # lexer.input(inp)
+            # for tok in lexer:
+            #     print(tok)
+            parser.parse(inp)
+        except KeyboardInterrupt:
+            print()
+            break
+        except EOFError:
+            print()
+            break

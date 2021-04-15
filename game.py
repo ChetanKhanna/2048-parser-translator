@@ -2,6 +2,16 @@ import random
 import copy
 
 class Board:
+    '''
+    General API for the game:
+    returns a dictionary with the following keys:
+    return = {
+        status = 1 for success, -1 for fail
+        data = {} of values returned by function or empty if failed or no data
+        error = string describing error
+    }
+    The keys for data dictionary are specified in particular function, if present
+    '''
     def __init__(self):
         self.board = [
             [[0, set()], [0, set()], [0, set()], [0, set()]],
@@ -46,29 +56,33 @@ class Board:
 
     def apply_move(self, move):
         self.changed = False
-        if move[2] == 'LEFT':
-            self._shift_left()
-            self._merge_left(move[1])
-            self._shift_left()
-        elif move[2] == 'RIGHT':
-            self._shift_right()
-            self._merge_right(move[1])
-            self._shift_right()
-        elif move[2] == 'UP':
-            self.board = [list(i) for i in zip(*self.board)]
-            self._shift_left()
-            self._merge_left(move[1])
-            self._shift_left()
-            self.board = [list(i) for i in zip(*self.board)]
-        else:
-            self.board = [list(i) for i in zip(*self.board)]
-            self._shift_right()
-            self._merge_right(move[1])
-            self._shift_right()
-            self.board = [list(i) for i in zip(*self.board)]
-        if self.changed:
-            self.find_empty_cells()
-            self.fill_random_tile()
+        try:
+            if move[2] == 'LEFT':
+                self._shift_left()
+                self._merge_left(move[1])
+                self._shift_left()
+            elif move[2] == 'RIGHT':
+                self._shift_right()
+                self._merge_right(move[1])
+                self._shift_right()
+            elif move[2] == 'UP':
+                self.board = [list(i) for i in zip(*self.board)]
+                self._shift_left()
+                self._merge_left(move[1])
+                self._shift_left()
+                self.board = [list(i) for i in zip(*self.board)]
+            else:
+                self.board = [list(i) for i in zip(*self.board)]
+                self._shift_right()
+                self._merge_right(move[1])
+                self._shift_right()
+                self.board = [list(i) for i in zip(*self.board)]
+            if self.changed:
+                self.find_empty_cells()
+                self.fill_random_tile()
+            return {'status': 1, 'data': {}, 'error': ''}
+        except Exception as e:
+            return {'status': -1, 'data': {}, 'error': e}
 
     def _shift_left(self):
         for i in range(4):
@@ -115,23 +129,38 @@ class Board:
                         self.board[i][j][0] *= self.board[i][j-1][0]
                     else:
                         self.board[i][j][0] /= self.board[i][j-1][0]
-                    self.board[i][j][0].update(self.board[i][j-1][0])
+                    self.board[i][j][1].update(self.board[i][j-1][1])
                     self.board[i][j-1] = [0, set()]
 
     def apply_assign(self, assign):
-        val = assign[1]
-        i, j = assign[2]
-        self.board[i-1][j-1][0] = val
+        try:
+            val = assign[1]
+            i, j = assign[2]
+            self.board[i-1][j-1][0] = val
+            return {'status': 1, 'data': {}, 'error': ''}
+        except Exception as e:
+            return {'status': -1, 'data': {}, 'error': e}
     
     def apply_name(self, name):
-        i, j = name[2]
-        if name[1] not in self.all_names:
-            self.all_names.add(name[1])
-            self.board[i-1][j-1][1].add(name[1])
+        try:
+            i, j = name[2]
+            if name[1] not in self.all_names:
+                self.all_names.add(name[1])
+                self.board[i-1][j-1][1].add(name[1])
+            return {'status': 1, 'data': {}, 'error': ''}
+        except Exception as e:
+            return {'status': -1, 'data': {}, 'error': e}
 
     def apply_query(self, query):
-        i, j = query[1]
-        return self.board[i-1][j-1][0]
+        '''
+        data dict keys:
+            value : value of stored in cell asked in query
+        '''
+        try:
+            i, j = query[1]
+            return {'status': 1, 'data': {'value': self.board[i-1][j-1][0]}, 'error': ''}
+        except Exception as e:
+            return {'status': -1, 'data': {}, 'error': e}
 
     def print_board(self):
         for i in range(4):
@@ -155,28 +184,28 @@ class Board:
                 print('|', val, end='     ')
             print('|')
 
-board = Board()
-board.initiate_new_board()
-board.print_board()
-board.apply_move(('move', 'MULTIPLY', 'LEFT'))
-print()
-board.print_board()
-print()
-board.apply_move(('move', 'MULTIPLY', 'LEFT'))
-print()
-board.print_board()
-print()
-board.apply_move(('move', 'MULTIPLY', 'LEFT'))
-print()
-board.print_board()
-board.apply_assign(('assign', 46, (3, 4)))
-print()
-board.print_board()
-board.apply_name(('name', 'xyz', (4, 3)))
-board.apply_name(('name', 'abcd', (4, 3)))
-print()
-print(board.board)
-print(board.all_names)
-res = board.apply_query(('query', (4, 1)))
-print()
-print(res)
+# board = Board()
+# board.initiate_new_board()
+# board.print_board()
+# board.apply_move(('move', 'MULTIPLY', 'LEFT'))
+# print()
+# board.print_board()
+# print()
+# board.apply_move(('move', 'MULTIPLY', 'LEFT'))
+# print()
+# board.print_board()
+# print()
+# board.apply_move(('move', 'MULTIPLY', 'LEFT'))
+# print()
+# board.print_board()
+# board.apply_assign(('assign', 46, (3, 4)))
+# print()
+# board.print_board()
+# board.apply_name(('name', 'xyz', (4, 3)))
+# board.apply_name(('name', 'abcd', (4, 3)))
+# print()
+# print(board.board)
+# print(board.all_names)
+# res = board.apply_query(('query', (4, 1)))
+# print()
+# print(res)
